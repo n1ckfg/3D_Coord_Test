@@ -8,8 +8,7 @@ public class MatchView : MonoBehaviour {
     public Camera cam;
 
     private void Update() {
-        Ray ray = cam.ScreenPointToRay(target.position);
-        transform.position = ray.origin;
+        transform.position = new Vector3(target.position.x, target.position.y, transform.position.z);
     }
 
 }
