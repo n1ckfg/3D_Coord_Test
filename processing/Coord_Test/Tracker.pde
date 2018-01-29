@@ -1,44 +1,53 @@
+import gab.opencv.*;
+
 class Tracker {
   
   String name = "";
   PGraphics tex;
+  OpenCV opencv;
   PVector pos, poi, up;
   float camOffset, texOffset;
   
   PGraphics3D p3d;
   PMatrix3D camMat;
   PVector targetPos;
-  
-  Tracker(float _camOffset, float _texOffset, String _name) {
+  PImage dst;
+  ArrayList<Contour> contours;
+
+  Tracker(PApplet app, float _camOffset, float _texOffset, String _name) {
     name = _name;
     tex = createGraphics(width/2, height, P3D);
     camOffset = _camOffset;
     texOffset = _texOffset;
     setupCamera();
     
-    //p3d = (PGraphics3D) g;
-    //camMat = new PMatrix3D();
+    opencv = new OpenCV(app, tex);
+    opencv.gray();
+    opencv.threshold(70);
   }
   
   void update() {
-    //camMat = p3d.modelview.get();
-    //targetPos = camMat.mult(new PVector(0,0,0), target.p);
+    opencv.loadImage(tex);
   }
   
   void draw(PGraphics tex) {
     tex.beginDraw();
     tex.background(0);
+    tex.camera(pos.x + camOffset, pos.y, pos.z, poi.x + camOffset, poi.y, poi.z, up.x, up.y, up.z);
+
     tex.pushMatrix();
     tex.translate(target.p.x, target.p.y, target.p.z);
     tex.noStroke();
-    tex.fill(255,0,0);
+    tex.fill(255, 0, 0);
     tex.sphere(20);
     tex.popMatrix();
-    tex.camera(pos.x + camOffset, pos.y, pos.z, poi.x + camOffset, poi.y, poi.z, up.x, up.y, up.z);
+    
     tex.endDraw();
     image(tex, texOffset, 0);
-    
-    println(name + ": " + target.p);
+        
+    contours = opencv.findContours();
+    Contour contour = contours.get(0);
+    targetPos = new PVector((float) contour.getBoundingBox().getCenterX(), (float) contour.getBoundingBox().getCenterY());
   }
   
   void run() {
